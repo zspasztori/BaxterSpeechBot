@@ -7,6 +7,7 @@ import os
 import apiai
 import uuid
 import json
+import botActions
 
 with open('gspeech.json', 'r') as myfile:
     GOOGLE_CLOUD_SPEECH_CREDENTIALS=myfile.read()
