@@ -16,6 +16,9 @@ class botActions():
             pass
 
     def destructor(self):
+        bashCommand = "rosrun baxter_tools tuck_arms.py -t"
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
         os.system('rosnode kill rsdk_velocity_joint_trajectory_action_server')
         os.system('rosnode kill botActions')
         return
@@ -33,7 +36,7 @@ class botActions():
     def tuckArms(response):
 
         try:
-            value = response['entities']['tuckArm'][0]['value']
+            value = response['result']['parameters']['eTuckUntuck']
         except KeyError:
             context = {'missing-key': 'tuckArm'}
             return context
@@ -53,8 +56,8 @@ class botActions():
     def gripperControl(response):
 
         try:
-            value_side = response['entities']['side'][0]['value']
-            value_action = response['entities']['open_close'][0]['value']
+            value_side = response['result']['parameters']['side']
+            value_action = response['result']['parameters']['eOpenClose']
         except KeyError:
             return
 
@@ -83,14 +86,16 @@ class botActions():
     def waveHand(response):
 
         try:
-            value_side = response['entities']['side'][0]['value']
+            value_side = response['result']['parameters']['side']
         except KeyError:
             return
 
-        if(value_side == 'left'):
+        if(value_side[0] == 'left'):
             side_explicit = 'left'
-        elif(value_side == 'right'):
+        elif(value_side[0] == 'right'):
             side_explicit = 'right'
+        print value_side
+        print side_explicit
 
         bashCommand = 'rosrun baxter_examples joint_trajectory_file_playback.py -f wave_hand_' + side_explicit
         subprocess.call(bashCommand.split(), stdout=subprocess.PIPE)
@@ -100,9 +105,8 @@ class botActions():
 
 
     actions = {
-        'TuckArms': tuckArms,
-        'GripperControl':gripperControl,
-        'WaveHand':waveHand,
-
-        'tuckArms': tuckArms, #for backward compatibility
+        'aTuckArm': tuckArms,
+        'aCloseHand':gripperControl,
+        'aWaveHand':waveHand,
+        'aSessionOver':destructor,
     }
